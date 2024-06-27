@@ -1,3 +1,5 @@
 numpy
 matplotlib
 tabulate
+networkx
+scipy
