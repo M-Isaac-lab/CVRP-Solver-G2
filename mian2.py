@@ -170,6 +170,7 @@ min_demand = 4
 max_demand = 30
 depot_index = 0
 num_trucks = randint(1,5)
+trucks_capacity = randint(40,100)
 
 cities = generate_cities(num_cities)
 G = generate_connected_graph(cities, limit)
@@ -177,7 +178,7 @@ shortest_paths = calculate_shortest_paths(G)
 complete_graph = build_complete_graph(shortest_paths, num_cities)
 capacities = generate_capacities(num_cities, min_demand, max_demand, depot_index)
 
-save_to_file(cities, complete_graph, capacities, f'graphes_txt/{num_cities}nodes_{depot_index}dindex_{num_trucks}trucks.txt',1000, num_trucks)
+save_to_file(cities, complete_graph, capacities, f'graphes_txt/{num_cities}nodes_{depot_index}dindex_{num_trucks}trucks.txt',trucks_capacity, num_trucks)
 save_to_file_json(cities, complete_graph, capacities, f'graphes_json/{num_cities}nodes_{depot_index}dindex_{num_trucks}trucks.json',1000, num_trucks)
 
 
