@@ -179,7 +179,7 @@ complete_graph = build_complete_graph(shortest_paths, num_cities)
 capacities = generate_capacities(num_cities, min_demand, max_demand, depot_index)
 
 save_to_file(cities, complete_graph, capacities, f'graphes_txt/{num_cities}nodes_{depot_index}dindex_{num_trucks}trucks.txt',trucks_capacity, num_trucks)
-save_to_file_json(cities, complete_graph, capacities, f'graphes_json/{num_cities}nodes_{depot_index}dindex_{num_trucks}trucks.json',1000, num_trucks)
+save_to_file_json(cities, complete_graph, capacities, f'graphes_json/{num_cities}nodes_{depot_index}dindex_{num_trucks}trucks.json',trucks_capacity, num_trucks)
 
 
 print("Coordonnées des villes :\n", cities)
