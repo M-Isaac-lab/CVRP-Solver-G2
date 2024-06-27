@@ -1,4 +1,5 @@
 import numpy as np
+from random import randint
 import networkx as nx
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
@@ -53,14 +54,30 @@ def generate_capacities(num_cities, min_demand=1, max_demand=10, depot_index=0):
     return capacities.tolist()
 
 
-def save_to_file(cities, distances, capacities, filename):
+def save_to_file(cities, distances, capacities, filename,c_trucks = 1000, num_trucks = 1):
+    # data = {
+    #     "cities": cities.tolist(),
+    #     "distances": distances.tolist(),
+    #     "demandes": capacities
+    # }
+    data = f"{len(cities)}\n{distances.tolist()}\n{capacities}\n{c_trucks}\n{num_trucks}"
+    # with open(filename, 'w') as f:
+    #     json.dump(data, f)
+    with open(filename, 'w') as f:
+        f.write(data)
+
+def save_to_file_json(cities, distances, capacities, filename,c_trucks = 1000, num_trucks = 1):
     data = {
         "cities": cities.tolist(),
         "distances": distances.tolist(),
-        "capacities": capacities
+        "demandes": capacities,
+        "trucks_capacities": c_trucks,
+        "num_trucks": num_trucks
     }
+    #data = f"{len(cities)}\n{distances.tolist()}\n{capacities}\n{c_trucks}\n{num_trucks}"
     with open(filename, 'w') as f:
-        json.dump(data, f)
+         json.dump(data, f)
+
 
 
 def plot_graph(G, cities):
@@ -152,6 +169,7 @@ limit = 5
 min_demand = 4
 max_demand = 30
 depot_index = 0
+num_trucks = randint(1,5)
 
 cities = generate_cities(num_cities)
 G = generate_connected_graph(cities, limit)
@@ -159,7 +177,9 @@ shortest_paths = calculate_shortest_paths(G)
 complete_graph = build_complete_graph(shortest_paths, num_cities)
 capacities = generate_capacities(num_cities, min_demand, max_demand, depot_index)
 
-save_to_file(cities, complete_graph, capacities, f'graphes/{num_cities}nodes_{depot_index}dindex.json')
+save_to_file(cities, complete_graph, capacities, f'graphes_txt/{num_cities}nodes_{depot_index}dindex_{num_trucks}trucks.txt',1000, num_trucks)
+save_to_file_json(cities, complete_graph, capacities, f'graphes_json/{num_cities}nodes_{depot_index}dindex_{num_trucks}trucks.json',1000, num_trucks)
+
 
 print("Coordonnées des villes :\n", cities)
 print("Capacités des villes :\n", capacities)
