@@ -54,13 +54,16 @@ def generate_capacities(num_cities, min_demand=1, max_demand=10, depot_index=0):
 
 
 def save_to_file(cities, distances, capacities, filename):
-    data = {
-        "cities": cities.tolist(),
-        "distances": distances.tolist(),
-        "capacities": capacities
-    }
+    # data = {
+    #     "cities": cities.tolist(),
+    #     "distances": distances.tolist(),
+    #     "demandes": capacities
+    # }
+    data = f"{len(cities).tolist()}\n{distances.tolist()}\n{capacities}"
+    # with open(filename, 'w') as f:
+    #     json.dump(data, f)
     with open(filename, 'w') as f:
-        json.dump(data, f)
+        f.write(data)
 
 
 def plot_graph(G, cities):
