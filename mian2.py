@@ -85,7 +85,7 @@ def plot_graph(G, cities):
     plt.show()
 
 
-num_cities = np.random.randint(1, 10)
+num_cities = np.random.randint(10, 25)
 avg_degree = np.random.uniform(1, 4)
 limit = 5
 min_demand = 4

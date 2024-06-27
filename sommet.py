@@ -2,6 +2,7 @@ import heapq
 import random
 import math
 import matplotlib.pyplot as plt
+import json
 
 ################ CONSTANTS #######################
 
@@ -9,7 +10,7 @@ MUTATION_RATE = 0.1
 CROSSOVER_RATE = 0.7
 POPULATION_SIZE = 100
 FITNESS = 0
-TRUCKS = 6
+TRUCKS = 1  # Nombre de camions
 DEPOT = None
 CAPACITY = 100
 INF = float("inf")
@@ -57,14 +58,18 @@ class Customer:
 def getProb():
     return random.random()
 
-def get_distance(cus1, cus2):
-    return math.sqrt((cus1.pos.x - cus2.pos.x) ** 2 + (cus1.pos.y - cus2.pos.y) ** 2)
+def get_distance_matrix(cus1, cus2, distance_matrix):
+    return distance_matrix[cus1.name][cus2.name]
 
-def get_fitness(chromosome):
+def get_fitness(chromosome, distance_matrix):
     total_distance = 0
     current_load = 0
     routes = []
     current_route = [DEPOT]
+
+    total_demand = sum(customer.demand for customer in chromosome)
+    if total_demand > CAPACITY:
+        return INF
 
     for customer in chromosome:
         if current_load + customer.demand <= CAPACITY:
@@ -81,7 +86,7 @@ def get_fitness(chromosome):
 
     for route in routes:
         for i in range(len(route) - 1):
-            total_distance += get_distance(route[i], route[i + 1])
+            total_distance += get_distance_matrix(route[i], route[i + 1], distance_matrix)
 
     return total_distance if len(routes) <= TRUCKS else INF
 
@@ -111,15 +116,26 @@ def create_population(customers):
 def select_parents(population):
     return random.sample(population, 2)
 
-def plot_solution(solution, filename="solution.png"):
-    plt.figure()
-    for route in solution:
-        x = [c.pos.x for c in route]
-        y = [c.pos.y for c in route]
-        plt.plot(x, y, 'o-')
+def plot_solution(solution, cities, filename="solution.png"):
+    plt.figure(figsize=(8, 6))
+
+    # Plot cities
+    x_cities = [city.pos.x for city in cities]
+    y_cities = [city.pos.y for city in cities]
+    plt.scatter(x_cities, y_cities, color='blue', label='Cities')
+
+    # Plot routes
+    colors = ['red', 'green', 'purple', 'orange', 'cyan', 'brown']  # Additional colors if more than 3 trucks
+    for idx, route in enumerate(solution):
+        x_route = [cities[city.name].pos.x for city in route]
+        y_route = [cities[city.name].pos.y for city in route]
+        plt.plot(x_route, y_route, 'o-', color=colors[idx % len(colors)], label=f'Truck {idx + 1}')
+
     plt.xlabel('X')
     plt.ylabel('Y')
     plt.title('Best Route Found')
+    plt.legend()
+    plt.grid(True)
     plt.savefig(filename)
     plt.close()
 
@@ -134,7 +150,7 @@ def save_solution_to_file(solution, fitness, filename="solution.txt"):
 
 ##################### EVOLUTION FUNCTION ##############################
 
-def Genetic_Algo(customers):
+def Genetic_Algo(customers, distance_matrix):
     population = create_population(customers)
     best_chromosome = None
     best_fitness = INF
@@ -148,9 +164,9 @@ def Genetic_Algo(customers):
             child2 = mutate(child2)
             new_population.extend([child1, child2])
 
-        population = sorted(new_population, key=get_fitness)[:POPULATION_SIZE]
+        population = sorted(new_population, key=lambda x: get_fitness(x, distance_matrix))[:POPULATION_SIZE]
         current_best = population[0]
-        current_fitness = get_fitness(current_best)
+        current_fitness = get_fitness(current_best, distance_matrix)
 
         if current_fitness < best_fitness:
             best_chromosome = current_best
@@ -182,28 +198,29 @@ def split_into_routes(chromosome):
 
 ######################## DATA ########################################
 
-def create_data_array():
-    locations = [(15, 19), (1, 49), (87, 25), (69, 65), (93, 91), (33, 31), (71, 61), (29, 9), (93, 7),
-                 (55, 47), (23, 13), (19, 47), (57, 63), (5, 95), (65, 43), (69, 1), (3, 25), (19, 91),
-                 (21, 81), (67, 91), (41, 23), (19, 75), (15, 79), (79, 47), (19, 65), (27, 49), (29, 17),
-                 (25, 65), (59, 51), (27, 95), (21, 91), (61, 83), (15, 83), (31, 87), (71, 41), (91, 21)]
+def create_data_array(filename):
+    with open(filename, 'r') as file:
+        data = json.load(file)
+        cities = data['cities']
+        distance_matrix = data['distances']
+        demands = data['demandes']
+        capacities = data['trucks_capacities']
+        
+    customers = [Customer(i, cities[i][0], cities[i][1], demands[i]) for i in range(len(cities))]
     
-    demands = [0, 1, 14, 15, 11, 18, 2, 22, 7, 18, 23, 12, 21, 2, 14, 9, 10, 4, 19, 2, 20, 15,
-               11, 6, 13, 19, 13, 8, 15, 18, 11, 21, 12, 2, 23, 11]
+    global DEPOT, CAPACITY
+    DEPOT = Customer(0, cities[0][0], cities[0][1], demands[0])
+    CAPACITY = capacities[0]
 
-    customers = [Customer(i, locations[i][0], locations[i][1], demands[i]) for i in range(1, len(locations))]
-    
-    global DEPOT
-    DEPOT = Customer(0, locations[0][0], locations[0][1], demands[0])
-
-    return customers
+    return customers, distance_matrix, cities
 
 ##################### MAIN ###########################################
 
 if __name__ == "__main__":
-    customers = create_data_array()
-    best_routes, best_fitness = Genetic_Algo(customers)
+    filename = 'graphes/14nodes_0dindex_1trucks.json.json'
+    customers, distance_matrix, cities = create_data_array(filename)
+    best_routes, best_fitness = Genetic_Algo(customers, distance_matrix)
     if best_routes is not None:
         save_solution_to_file(best_routes, best_fitness)
-        plot_solution(best_routes)
+        plot_solution(best_routes, customers)
         print("Best solution found with fitness:", best_fitness)
