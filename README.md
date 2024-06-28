@@ -1,0 +1,2 @@
+We picked the genetic algorithm because it's easy to use, reliable, and flexible, compared to other complex algorithms.
+The genetic algorithm works like natural selection in evolution. It uses a group of solutions (population), each represented by a code (chromosome) made up of parts (genes). Over time (generations), these solutions evolve through a fitness test to see how good they are, selection of the best ones, mixing (crossover), and random changes (mutation) to improve them.
